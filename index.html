@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Neon Runner - GitHub Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #0d0e15;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            color: #fff;
+        }
+        h1 {
+            text-shadow: 0 0 10px #ff007f;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        #gameContainer {
+            position: relative;
+            width: 800px;
+            height: 400px;
+            background: linear-gradient(to bottom, #141923, #1a1c2e);
+            border: 4px solid #00f0ff;
+            box-shadow: 0 0 20px #00f0ff, inset 0 0 20px rgba(0, 240, 255, 0.2);
+            overflow: hidden;
+            border-radius: 10px;
+        }
+        canvas {
+            display: block;
+        }
+        #ui-layer {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-shadow: 0 0 5px #00f0ff;
+            pointer-events: none;
+        }
+        #scoreBoard { color: #00f0ff; }
+        #highScoreBoard { color: #ff007f; }
+        #screen-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: rgba(13, 14, 21, 0.85);
+            padding: 30px;
+            border-radius: 10px;
+            border: 2px solid #ff007f;
+            box-shadow: 0 0 15px #ff007f;
+        }
+        #screen-message h2 {
+            font-size: 2.5rem;
+            color: #ff007f;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px #ff007f;
+        }
+        #screen-message p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: #00f0ff;
+        }
+        button {
+            background: transparent;
+            color: #00f0ff;
+            border: 2px solid #00f0ff;
+            padding: 10px 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+        button:hover {
+            background: #00f0ff;
+            color: #0d0e15;
+            box-shadow: 0 0 20px #00f0ff;
+        }
+        .instructions {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #8a8f98;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>NEON RUNNER</h1>
+    
+    <div id="gameContainer">
+        <div id="ui-layer">
+            <div id="scoreBoard">SKOR: 0</div>
+            <div id="highScoreBoard">TERTINGGI: 0</div>
+        </div>
+        
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+        
+        <div id="screen-message">
+            <h2 id="msg-title">NEON RUNNER</h2>
+            <p id="msg-text">Lompati rintangan laser dan bertahanlah selama mungkin!</p>
+            <button id="startBtn" onclick="startGame()">MAIN</button>
+        </div>
+    </div>
+
+    <div class="instructions">
+        Kontrol: <strong>SPASI</strong> atau <strong>Klik Atas</strong> untuk Melompat.
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreBoard = document.getElementById('scoreBoard');
+        const highScoreBoard = document.getElementById('highScoreBoard');
+        const screenMessage = document.getElementById('screen-message');
+        const msgTitle = document.getElementById('msg-title');
+        const msgText = document.getElementById('msg-text');
+        const startBtn = document.getElementById('startBtn');
+
+        // Game State
+        let isPlaying = false;
+        let score = 0;
+        let highScore = localStorage.getItem('neonRunnerHighScore') || 0;
+        highScoreBoard.innerText = `TERTINGGI: ${highScore}`;
+
+        // Game Variables
+        let player;
+        let obstacles = [];
+        let gameSpeed = 6;
+        let animationFrameId;
+        let spawnTimer = 0;
+
+        // Player Object
+        class Player {
+            constructor() {
+                this.x = 80;
+                this.y = 300;
+                this.size = 35;
+                this.vy = 0;
+                this.gravity = 0.6;
+                this.jumpForce = -13;
+                this.isGrounded = false;
+                this.glow = 0;
+            }
+
+            jump() {
+                if (this.isGrounded) {
+                    this.vy = this.jumpForce;
+                    this.isGrounded = false;
+                }
+            }
+
+            update() {
+                this.vy += this.gravity;
+                this.y += this.vy;
+
+                // Batas tanah (Floor line is at y = 350)
+                if (this.y + this.size >= 350) {
+                    this.y = 350 - this.size;
+                    this.vy = 0;
+                    this.isGrounded = true;
+                }
+
+                // Efek animasi glow pulsa
+                this.glow = Math.sin(Date.now() / 100) * 5;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.shadowBlur = 10 + this.glow;
+                ctx.shadowColor = '#00f0ff';
+                ctx.fillStyle = '#00f0ff';
+                // Menggambar karakter kotak futuristik
+                ctx.fillRect(this.x, this.y, this.size, this.size);
+                
+                // Variasi core bagian dalam
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(this.x + 8, this.y + 8, this.size - 16, this.size - 16);
+                ctx.restore();
+            }
+        }
+
+        // Obstacle Object
+        class Obstacle {
+            constructor() {
+                this.x = canvas.width;
+                this.width = 20 + Math.random() * 20;
+                this.height = 30 + Math.random() * 40;
+                this.y = 350 - this.height;
+                this.color = '#ff007f';
+            }
+
+            update() {
+                this.x -= gameSpeed;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = this.color;
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                ctx.restore();
+            }
+        }
+
+        // Setup Input
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.code === 'ArrowUp') {
+                e.preventDefault();
+                if (isPlaying) {
+                    player.jump();
+                } else if (screenMessage.style.display !== 'none') {
+                    startGame();
+                }
+            }
+        });
+
+        // Touch input untuk HP
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (isPlaying) player.jump();
+        });
+
+        function startGame() {
+            // Reset game state
+            isPlaying = true;
+            score = 0;
+            gameSpeed = 6;
+            obstacles = [];
+            spawnTimer = 0;
+            player = new Player();
+            
+            scoreBoard.innerText = `SKOR: ${score}`;
+            screenMessage.style.display = 'none';
+            
+            // Mulai loop game
+            cancelAnimationFrame(animationFrameId);
+            gameLoop();
+        }
+
+        function gameOver() {
+            isPlaying = false;
+            cancelAnimationFrame(animationFrameId);
+            
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('neonRunnerHighScore', highScore);
+                highScoreBoard.innerText = `TERTINGGI: ${highScore}`;
+            }
+
+            msgTitle.innerText = "GAME OVER";
+            msgText.innerText = `Skor Kamu: ${score}\nBisa lebih baik lagi?`;
+            startBtn.innerText = "COBA LAGI";
+            screenMessage.style.display = 'block';
+        }
+
+        // Menggambar Background Tanah Elektronik
+        function drawBackground() {
+            // Garis tanah utama
+            ctx.strokeStyle = '#00f0ff';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, 350);
+            ctx.lineTo(canvas.width, 350);
+            ctx.stroke();
+
+            // Efek grid cyber di bawah tanah
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.15)';
+            ctx.lineWidth = 1;
+            for(let i = 0; i < canvas.width; i += 40) {
+                ctx.beginPath();
+                ctx.moveTo(i, 350);
+                ctx.lineTo(i - 100, canvas.height); // Garis perspektif perspektif
+                ctx.stroke();
+            }
+        }
+
+        // Loop Game Utama
+        function gameLoop() {
+            if (!isPlaying) return;
+
+            // Bersihkan canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw enviroment
+            drawBackground();
+
+            // Update dan Draw Player
+            player.update();
+            player.draw();
+
+            // Manage Obstacles
+            spawnTimer++;
+            // Beri jarak acak antar rintangan
+            let randomSpawnRate = Math.max(50, 90 - Math.floor(gameSpeed * 2));
+            if (spawnTimer > randomSpawnRate) {
+                obstacles.push(new Obstacle());
+                spawnTimer = 0;
+            }
+
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                obstacles[i].update();
+                obstacles[i].draw();
+
+                // Deteksi Tabrakan (AABB Collision)
+                if (
+                    player.x < obstacles[i].x + obstacles[i].width &&
+                    player.x + player.size > obstacles[i].x &&
+                    player.y < obstacles[i].y + obstacles[i].height &&
+                    player.y + player.size > obstacles[i].y
+                ) {
+                    gameOver();
+                    return;
+                }
+
+                // Hapus rintangan lolos dan tambah skor
+                if (obstacles[i].x + obstacles[i].width < 0) {
+                    obstacles.splice(i, 1);
+                    score++;
+                    scoreBoard.innerText = `SKOR: ${score}`;
+                    
+                    // Tingkatkan kecepatan setiap kelipatan 5 skor
+                    if (score % 5 === 0) {
+                        gameSpeed += 0.5;
+                    }
+                }
+            }
+
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        // Gambar tampilan awal grid saat game pertama dimuat
+        drawBackground();
+    </script>
+</body>
+</html>
