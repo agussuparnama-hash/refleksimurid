@@ -21,15 +21,20 @@
     <input type="text" id="nisn" placeholder="Contoh: 0138932920" maxlength="10">
     <input type="date" id="tglLahir">
     <button onclick="cekPesan()">Lihat Pesan</button>
+   <!-- Bagian hasil yang sudah diperbarui -->
     <div id="hasil">
-        <p><strong>Nama:</strong> <span id="namaSiswa"></span></p>
-        <p id="isiPesan" style="text-align: justify;"></p>
+        <p style="font-size: 1.1em; color: #2c3e50;"><strong>Halo, <span id="namaSiswa"></span>!</strong></p>
         
-        <div id="footerPesan" style="margin-top: 25px; padding: 15px; background: #e8f5e9; border-radius: 10px; font-size: 0.95em; color: #2e7d32; border: 1px dashed #a5d6a7;">
-            <strong>Pesan Semangat untuk Masa Depan:</strong><br>
-            "Ingatlah Nak, setiap usaha belajar mandiri yang kamu lakukan hari ini bukan untuk orang lain, melainkan <strong>investasi terbaik untuk kebaikan dirimu sendiri di masa depan</strong>. Teruslah tumbuh, teruslah berjuang, karena kamu layak mendapatkan masa depan yang cerah!"
+        <!-- Pesan Personal Guru -->
+        <p class="pesan-utama" id="isiPesan" style="text-align: justify; color: #333; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 20px;"></p>
+        
+        <!-- Pesan Penutup (Kemandirian & Literasi) -->
+        <div class="footer-pesan" style="padding: 20px; background: #fdfdfd; border-radius: 12px; font-size: 0.95em; color: #2e7d32; border: 2px dashed #27ae60;">
+            <strong style="display: block; margin-bottom: 10px;">💡 Pesan Semangat untuk Masa Depan:</strong>
+            <p style="margin: 0;">
+                "Nak, Bapak/Ibu sangat bangga melihat proses belajarmu. Ingatlah bahwa <strong>belajar mandiri</strong> adalah kunci pembuka pintu masa depanmu. Jangan pernah bosan untuk <strong>meningkatkan literasi</strong> dengan banyak membaca, karena setiap kata yang kamu pahami hari ini adalah investasi berharga untuk <strong>kebaikan dirimu sendiri</strong> di masa depan. Tetaplah berproses, Bapak/Ibu selalu mendukung langkahmu!"
+            </p>
         </div>
-        
     </div>
 
 <script>
