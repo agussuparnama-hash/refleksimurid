@@ -3,353 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neon Neon Runner - GitHub Game</title>
+    <title>Pesan Khusus Wali Kelas</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            background-color: #0d0e15;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            overflow: hidden;
-            color: #fff;
-        }
-        h1 {
-            text-shadow: 0 0 10px #ff007f;
-            margin-bottom: 10px;
-            font-size: 2rem;
-        }
-        #gameContainer {
-            position: relative;
-            width: 800px;
-            height: 400px;
-            background: linear-gradient(to bottom, #141923, #1a1c2e);
-            border: 4px solid #00f0ff;
-            box-shadow: 0 0 20px #00f0ff, inset 0 0 20px rgba(0, 240, 255, 0.2);
-            overflow: hidden;
-            border-radius: 10px;
-        }
-        canvas {
-            display: block;
-        }
-        #ui-layer {
-            position: absolute;
-            top: 15px;
-            left: 20px;
-            right: 20px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 1.2rem;
-            font-weight: bold;
-            text-shadow: 0 0 5px #00f0ff;
-            pointer-events: none;
-        }
-        #scoreBoard { color: #00f0ff; }
-        #highScoreBoard { color: #ff007f; }
-        #screen-message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            background: rgba(13, 14, 21, 0.85);
-            padding: 30px;
-            border-radius: 10px;
-            border: 2px solid #ff007f;
-            box-shadow: 0 0 15px #ff007f;
-        }
-        #screen-message h2 {
-            font-size: 2.5rem;
-            color: #ff007f;
-            margin-bottom: 15px;
-            text-shadow: 0 0 10px #ff007f;
-        }
-        #screen-message p {
-            font-size: 1.1rem;
-            margin-bottom: 20px;
-            color: #00f0ff;
-        }
-        button {
-            background: transparent;
-            color: #00f0ff;
-            border: 2px solid #00f0ff;
-            padding: 10px 25px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
-        }
-        button:hover {
-            background: #00f0ff;
-            color: #0d0e15;
-            box-shadow: 0 0 20px #00f0ff;
-        }
-        .instructions {
-            margin-top: 15px;
-            font-size: 0.9rem;
-            color: #8a8f98;
-            text-align: center;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; padding: 20px; display: flex; justify-content: center; }
+        .card { background: white; padding: 30px; border-radius: 20px; width: 100%; max-width: 600px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        h2 { color: #2c3e50; text-align: center; }
+        input { width: 93%; margin: 10px 0; padding: 15px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; }
+        button { width: 100%; padding: 15px; background: #27ae60; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 18px; margin-top: 10px; }
+        #hasil { margin-top: 30px; padding: 20px; background: #fdfdfd; border-left: 6px solid #27ae60; border-radius: 5px; display: none; line-height: 1.6; }
     </style>
 </head>
 <body>
 
-    <h1>NEON RUNNER</h1>
-    
-    <div id="gameContainer">
-        <div id="ui-layer">
-            <div id="scoreBoard">SKOR: 0</div>
-            <div id="highScoreBoard">TERTINGGI: 0</div>
-        </div>
-        
-        <canvas id="gameCanvas" width="800" height="400"></canvas>
-        
-        <div id="screen-message">
-            <h2 id="msg-title">NEON RUNNER</h2>
-            <p id="msg-text">Lompati rintangan laser dan bertahanlah selama mungkin!</p>
-            <button id="startBtn" onclick="startGame()">MAIN</button>
-        </div>
+<div class="card">
+    <h2>Halo Muridku! 👋</h2>
+    <p style="text-align: center; color: #666;">Masukkan NISN (10 digit) dan Tanggal Lahir untuk melihat pesanmu:</p>
+    <input type="text" id="nisn" placeholder="Contoh: 0138932920" maxlength="10">
+    <input type="date" id="tglLahir">
+    <button onclick="cekPesan()">Lihat Pesan</button>
+    <div id="hasil">
+        <p><strong>Nama:</strong> <span id="namaSiswa"></span></p>
+        <p id="isiPesan" style="text-align: justify;"></p>
+        <p style="margin-top: 20px; font-style: italic; color: #555;">Semangat belajar, Bapak/Ibu Guru.</p>
     </div>
+</div>
 
-    <div class="instructions">
-        Kontrol: <strong>SPASI</strong> atau <strong>Klik Atas</strong> untuk Melompat.
-    </div>
+<script>
+    // Data siswa yang telah diperbarui
+    const dataSiswa = {
+        "0138932920_2013-03-11": { "nama": "Ni Kade Eva Swari", "pesan": "Halo Ni Kade Eva Swari, Bapak/Ibu ingin berbagi sedikit refleksi untukmu: Saat pelajaran lebih fokus dengan pelajaran dan berusaha jangan terganggu dengan sekitarmu, Tingkatkan literasi dan membaca buku, berusahalah mengerti sesuatu informasi tanpa harus tergantung dengan orang lain. Ingatlah bahwa masa depanmu sangat berharga. Disiplin diri adalah bentuk kasih sayang terbaik untuk dirimu sendiri saat ini. Bapak/Ibu percaya kamu bisa melampaui tantangan ini. Teruslah berproses dan jangan ragu untuk berdiskusi jika ada kesulitan." },
+        "0127963367_2012-12-14": { "nama": "Ni Ketut Manik Suardani", "pesan": "Halo Ni Ketut Manik Suardani, Bapak/Ibu terus memantau perkembanganmu: Tingkatkan rasa ingin tahu, imbangi dengan rasa ingin mengisi rasa ingin tahu tersebut, gapapa punya teman sedikit yang penting positif. Bapak/Ibu bangga dengan kemajuan yang telah kamu capai sejauh ini. Teruslah tingkatkan potensi dirimu. Ingat, Bapak/Ibu selalu ada di sini untuk mendukung langkahmu di sekolah. Tetaplah berintegritas dalam setiap tindakan." },
+        "0116167385_2011-10-12": { "nama": "Ni Ketut Suartini", "pesan": "Halo Ni Ketut Suartini, Bapak/Ibu ingin berbagi sedikit refleksi untukmu: Saat pelajaran lebih fokus dengan pelajaran dan berusaha jangan terganggu dengan sekitarmu, kurangi waktu bermain saat di rumah, berusaha menyelesaikan pekerjaan di rumah, belajar jd orang yang bisa diandalkan, belajar matematika adalah dengan cara meningkatkan rasa ingin menaklukan sesuatu dan perbanyak latihan. Ingatlah bahwa masa depanmu sangat berharga. Disiplin diri adalah bentuk kasih sayang terbaik untuk dirimu sendiri saat ini. Bapak/Ibu percaya kamu bisa melampaui tantangan ini. Teruslah berproses dan jangan ragu untuk berdiskusi jika ada kesulitan." },
+        "0126971751_2012-06-24": { "nama": "NI Ketut Yuni Suastini", "pesan": "Halo NI Ketut Yuni Suastini, Bapak/Ibu ingin berbagi sedikit refleksi untukmu: Saat pelajaran lebih fokus dengan pelajaran dan berusaha jangan terganggu dengan sekitarmu, Tingkatkan literasi dan membaca buku, berusahalah mengerti sesuatu informasi tanpa harus tergantung dengan orang lain. Ingatlah bahwa masa depanmu sangat berharga. Disiplin diri adalah bentuk kasih sayang terbaik untuk dirimu sendiri saat ini. Bapak/Ibu percaya kamu bisa melampaui tantangan ini. Teruslah berproses dan jangan ragu untuk berdiskusi jika ada kesulitan." },
+        "0133539724_2013-02-28": { "nama": "Ni Komang Jean Naora Febriani", "pesan": "Halo Ni Komang Jean Naora Febriani, Bapak/Ibu ingin berbagi sedikit refleksi untukmu: Tingkatkan literasi dan membaca buku, berusahalah mengerti sesuatu informasi tanpa harus tergantung dengan orang lain. Ingatlah bahwa masa depanmu sangat berharga. Disiplin diri adalah bentuk kasih sayang terbaik untuk dirimu sendiri saat ini. Bapak/Ibu percaya kamu bisa melampaui tantangan ini. Teruslah berproses dan jangan ragu untuk berdiskusi jika ada kesulitan." },
+        "0127241790_2012-10-14": { "nama": "NI KOMANG SUNYA LOKA SWARI", "pesan": "Halo NI KOMANG SUNYA LOKA SWARI, Bapak/Ibu perhatikan kamu belum mengisi link respon yang diberikan. Mohon segera dilengkapi ya agar Bapak/Ibu bisa memberikan bimbingan yang lebih tepat untukmu. Tetap semangat, Bapak/Ibu tunggu partisipasimu." },
+        "3121295729_2012-10-04": { "nama": "NI LUH AYU SARI OKTAPIANI LESTARI", "pesan": "Halo NI LUH AYU SARI OKTAPIANI LESTARI, Bapak/Ibu perhatikan kamu belum mengisi link respon yang diberikan. Mohon segera dilengkapi ya agar Bapak/Ibu bisa memberikan bimbingan yang lebih tepat untukmu. Tetap semangat, Bapak/Ibu tunggu partisipasimu." },
+        "0127315288_2012-10-03": { "nama": "Ni Luh Laura Cantika Putri", "pesan": "Halo Ni Luh Laura Cantika Putri, Bapak/Ibu ingin berbagi sedikit refleksi untukmu: Saat pelajaran lebih fokus dengan pelajaran dan berusaha jangan terganggu dengan sekitarmu, Tingkatkan literasi dan membaca buku, berusahalah mengerti sesuatu informasi tanpa harus tergantung dengan orang lain. Ingatlah bahwa masa depanmu sangat berharga. Disiplin diri adalah bentuk kasih sayang terbaik untuk dirimu sendiri saat ini. Bapak/Ibu percaya kamu bisa melampaui tantangan ini. Teruslah berproses dan jangan ragu untuk berdiskusi jika ada kesulitan." },
+        "3127121885_2012-05-30": { "nama": "Ni Luh Santiani", "pesan": "Halo Ni Luh Santiani, Bapak/Ibu terus memantau perkembanganmu: Berusaha belajar secara mandiri, dan menggunakan seefesien mungkin, (atur waktu) berjuang untuk masa depan sendiri. Bapak/Ibu bangga dengan kemajuan yang telah kamu capai sejauh ini. Teruslah tingkatkan potensi dirimu. Ingat, Bapak/Ibu selalu ada di sini untuk mendukung langkahmu di sekolah. Tetaplah berintegritas dalam setiap tindakan." },
+        "3126215525_2012-07-13": { "nama": "Ni Made Julia Asriningsih", "pesan": "Halo Ni Made Julia Asriningsih, Bapak/Ibu ingin berbagi sedikit refleksi untukmu: Tingkatkan literasi dan membaca buku, berusahalah mengerti sesuatu informasi tanpa harus tergantung dengan orang lain. Ingatlah bahwa masa depanmu sangat berharga. Disiplin diri adalah bentuk kasih sayang terbaik untuk dirimu sendiri saat ini. Bapak/Ibu percaya kamu bisa melampaui tantangan ini. Teruslah berproses dan jangan ragu untuk berdiskusi jika ada kesulitan." },
+        "0137302123_2013-03-19": { "nama": "Ni Made Pradnyan Dwi Mulyani", "pesan": "Halo Ni Made Pradnyan Dwi Mulyani, Bapak/Ibu ingin berbagi sedikit refleksi untukmu: Saat pelajaran lebih fokus dengan pelajaran dan berusaha jangan terganggu dengan sekitarmu, Tingkatkan literasi dan membaca buku, berusahalah mengerti sesuatu informasi tanpa harus tergantung dengan orang lain. Ingatlah bahwa masa depanmu sangat berharga. Disiplin diri adalah bentuk kasih sayang terbaik untuk dirimu sendiri saat ini. Bapak/Ibu percaya kamu bisa melampaui tantangan ini. Teruslah berproses dan jangan ragu untuk berdiskusi jika ada kesulitan." },
+        "3127090260_2012-12-20": { "nama": "NI NENGAH DESITI RATNANINGSIH", "pesan": "Halo NI NENGAH DESITI RATNANINGSIH, Bapak/Ibu ingin berbagi sedikit refleksi untukmu: Saat pelajaran lebih fokus dengan pelajaran dan berusaha jangan terganggu dengan sekitarmu, Tingkatkan literasi dan membaca buku, berusahalah mengerti sesuatu informasi tanpa harus tergantung dengan orang lain. Ingatlah bahwa masa depanmu sangat berharga. Disiplin diri adalah bentuk kasih sayang terbaik untuk dirimu sendiri saat ini. Bapak/Ibu percaya kamu bisa melampaui tantangan ini. Teruslah berproses dan jangan ragu untuk berdiskusi jika ada kesulitan." },
+        "0139671574_2013-08-05": { "nama": "Ni Nyoman Sadriasih", "pesan": "Halo Ni Nyoman Sadriasih, Bapak/Ibu ingin berbagi sedikit refleksi untukmu: Saat pelajaran lebih fokus dengan pelajaran dan berusaha jangan terganggu dengan sekitarmu, kurangi waktu bermain saat di rumah, berusaha menyelesaikan pekerjaan di rumah, belajar jd orang yang bisa diandalkan. Ingatlah bahwa masa depanmu sangat berharga. Disiplin diri adalah bentuk kasih sayang terbaik untuk dirimu sendiri saat ini. Bapak/Ibu percaya kamu bisa melampaui tantangan ini. Teruslah berproses dan jangan ragu untuk berdiskusi jika ada kesulitan." },
+        "0122891853_2012-10-11": { "nama": "Ni Putu Ayu Pratiwi Darmayanti", "pesan": "Halo Ni Putu Ayu Pratiwi Darmayanti, Bapak/Ibu terus memantau perkembanganmu: Perbanyak baca Buku, belajar memahami sesuatu tanpa harus bergantung pada orang lain, tidak apa pergaulan kurang, tapi berusahalah mencari teman namun pilihlah berteman yang bisa berpikir positif, belajar bahasa inggris dengan mencoba merangkai kata-kata dan mengucapkannya sendiri, tanya jawab di depan kaca, atau tidak menceritakan sesuatu. Bapak/Ibu bangga dengan kemajuan yang telah kamu capai sejauh ini. Teruslah tingkatkan potensi dirimu. Ingat, Bapak/Ibu selalu ada di sini untuk mendukung langkahmu di sekolah. Tetaplah berintegritas dalam setiap tindakan." },
+        "0125582494_2012-07-17": { "nama": "Ni Putu Marsya Maharani", "pesan": "Halo Ni Putu Marsya Maharani, Bapak/Ibu ingin berbagi sedikit refleksi untukmu: Tingkatkan literasi dan membaca buku, berusahalah mengerti sesuatu informasi tanpa harus tergantung dengan orang lain. Ingatlah bahwa masa depanmu sangat berharga. Disiplin diri adalah bentuk kasih sayang terbaik untuk dirimu sendiri saat ini. Bapak/Ibu percaya kamu bisa melampaui tantangan ini. Teruslah berproses dan jangan ragu untuk berdiskusi jika ada kesulitan." },
+        "0137300021_2013-03-30": { "nama": "I Gede Arya Suputra", "pesan": "Halo I Gede Arya Suputra, Bapak/Ibu terus memantau perkembanganmu: Semua orang punya kelemahan dan kelebihan, belajar di sekolah bertujuan kita dapat mempelajari sesuatu dengan kecakapan yang berbeda-beda dalam situasi yang berbeda. Intinya belajar klasikal kita di ajarkan harus dapat berusaha memahami seseorang. di dunia nyata kita akan bertemu banyak orang dengan karakter berbeda. Belajar dari guru yang berbeda adalah latihan terbaik untuk masa depan kalian. Kecakapan setiap guru itu berbeda. Belajar dari berbagai gaya mengajar akan membuat sudut pandang kalian semakin luas. kelebihan : sudah mau intropeksi dan refleksi. Bapak/Ibu bangga dengan kemajuan yang telah kamu capai sejauh ini. Teruslah tingkatkan potensi dirimu. Ingat, Bapak/Ibu selalu ada di sini untuk mendukung langkahmu di sekolah. Tetaplah berintegritas dalam setiap tindakan." },
+        "0139556904_2013-02-23": { "nama": "I Gede Sudarsana", "pesan": "Halo I Gede Sudarsana, Bapak/Ibu perhatikan kamu belum mengisi link respon yang diberikan. Mohon segera dilengkapi ya agar Bapak/Ibu bisa memberikan bimbingan yang lebih tepat untukmu. Tetap semangat, Bapak/Ibu tunggu partisipasimu." },
+        "3127103528_2012-10-26": { "nama": "I Gusti Ngurah Agung Satwika Adi Wiguna", "pesan": "Halo I Gusti Ngurah Agung Satwika Adi Wiguna, Bapak/Ibu ingin berbagi sedikit refleksi untukmu: di dunia nyata kita akan bertemu banyak orang dengan karakter berbeda. Belajar dari guru yang berbeda adalah latihan terbaik untuk masa depan kalian. Kecakapan setiap guru itu berbeda. Belajar dari berbagai gaya mengajar akan membuat sudut pandang kalian semakin luas. Saat pelajaran lebih fokus dengan pelajaran dan berusaha jangan terganggu dengan sekitarmu, Tingkatkan literasi dan membaca buku, berusahalah mengerti sesuatu informasi tanpa harus tergantung dengan orang lain. Ingatlah bahwa masa depanmu sangat berharga. Disiplin diri adalah bentuk kasih sayang terbaik untuk dirimu sendiri saat ini. Bapak/Ibu percaya kamu bisa melampaui tantangan ini. Teruslah berproses dan jangan ragu untuk berdiskusi jika ada kesulitan." },
+        "0111836818_2011-11-13": { "nama": "I Kade Suarma Yasa", "pesan": "Halo I Kade Suarma Yasa, Bapak/Ibu perhatikan kamu belum mengisi link respon yang diberikan. Mohon segera dilengkapi ya agar Bapak/Ibu bisa memberikan bimbingan yang lebih tepat untukmu. Tetap semangat, Bapak/Ibu tunggu partisipasimu." },
+        "0138402599_2013-03-19": { "nama": "I Kade Sumerta", "pesan": "Halo I Kade Sumerta, Bapak/Ibu ingin berbagi sedikit refleksi untukmu: Saat pelajaran lebih fokus dengan pelajaran dan berusaha jangan terganggu dengan sekitarmu, Tingkatkan literasi dan membaca buku, berusahalah mengerti sesuatu informasi tanpa harus tergantung dengan orang lain. Belajar secara klasikal (dalam kelas) dengan guru yang berbeda, Kecakapan setiap guru itu berbeda. Belajar dari berbagai gaya mengajar akan membuat sudut pandang kalian semakin luas. Ingatlah bahwa masa depanmu sangat berharga. Disiplin diri adalah bentuk kasih sayang terbaik untuk dirimu sendiri saat ini. Bapak/Ibu percaya kamu bisa melampaui tantangan ini. Teruslah berproses dan jangan ragu untuk berdiskusi jika ada kesulitan." },
+        "3122015437_2012-10-14": { "nama": "I Ketut Dian Mahendra", "pesan": "Halo I Ketut Dian Mahendra, Bapak/Ibu terus memantau perkembanganmu: Memiliki kepribadian tertutup dan sering memendam masalah sendiri. Terkadang berbagi isi perasaan itu penting tetapi memang butuh orang yang tepat, tapi setidaknya sebagai tempat keluh kesah, atau mencari sedikit alternatif solusi dari permasalahan yang kita hadapi, mencobalah terbuka walaupun bukan kepada setiap orang. Bapak/Ibu bangga dengan kemajuan yang telah kamu capai sejauh ini. Teruslah tingkatkan potensi dirimu. Ingat, Bapak/Ibu selalu ada di sini untuk mendukung langkahmu di sekolah. Tetaplah berintegritas dalam setiap tindakan." },
+        "3133992745_2013-01-29": { "nama": "I KETUT PUTRA DARMA YASA", "pesan": "Halo I KETUT PUTRA DARMA YASA, Bapak/Ibu perhatikan kamu belum mengisi link respon yang diberikan. Mohon segera dilengkapi ya agar Bapak/Ibu bisa memberikan bimbingan yang lebih tepat untukmu. Tetap semangat, Bapak/Ibu tunggu partisipasimu." },
+        "0131589554_2013-04-24": { "nama": "I Komang Galang Kusuma", "pesan": "Halo I Komang Galang Kusuma, Bapak/Ibu ingin berbagi sedikit refleksi untukmu: Saat pelajaran lebih fokus dengan pelajaran dan berusaha jangan terganggu dengan sekitarmu, kurangi waktu bermain saat di rumah, berusaha menyelesaikan pekerjaan di rumah, belajar jd orang yang bisa diandalkan, belajar matematika adalah dengan cara meningkatkan rasa ingin menaklukan sesuatu dan perbanyak latihan. Ingatlah bahwa masa depanmu sangat berharga. Disiplin diri adalah bentuk kasih sayang terbaik untuk dirimu sendiri saat ini. Bapak/Ibu percaya kamu bisa melampaui tantangan ini. Teruslah berproses dan jangan ragu untuk berdiskusi jika ada kesulitan." },
+        "0122364962_2012-04-24": { "nama": "I Komang Satia Wirawan", "pesan": "Halo I Komang Satia Wirawan, Bapak/Ibu perhatikan kamu belum mengisi link respon yang diberikan. Mohon segera dilengkapi ya agar Bapak/Ibu bisa memberikan bimbingan yang lebih tepat untukmu. Tetap semangat, Bapak/Ibu tunggu partisipasimu." },
+        "0132511715_2013-05-25": { "nama": "I Made Ardika Darma Susila", "pesan": "Halo I Made Ardika Darma Susila, Bapak/Ibu ingin berbagi sedikit refleksi untukmu: Saat pelajaran lebih fokus dengan pelajaran dan berusaha jangan terganggu dengan sekitarmu. Ingatlah bahwa masa depanmu sangat berharga. Disiplin diri adalah bentuk kasih sayang terbaik untuk dirimu sendiri saat ini. Bapak/Ibu percaya kamu bisa melampaui tantangan ini. Teruslah berproses dan jangan ragu untuk berdiskusi jika ada kesulitan." },
+        "0125614580_2012-12-15": { "nama": "I Nengah Restu Widiantara", "pesan": "Halo I Nengah Restu Widiantara, Bapak/Ibu ingin berbagi sedikit refleksi untukmu: Saat pelajaran lebih fokus dengan pelajaran dan berusaha jangan terganggu dengan sekitarmu, kurangi waktu bermain saat di rumah, berusaha menyelesaikan pekerjaan di rumah, belajar jd orang yang bisa diandalkan. Lebih rajin sekolah, sekolah/belajar itu penting buat perkembangan diri. Ingatlah bahwa masa depanmu sangat berharga. Disiplin diri adalah bentuk kasih sayang terbaik untuk dirimu sendiri saat ini. Bapak/Ibu percaya kamu bisa melampaui tantangan ini. Teruslah berproses dan jangan ragu untuk berdiskusi jika ada kesulitan." }
+    };
 
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const scoreBoard = document.getElementById('scoreBoard');
-        const highScoreBoard = document.getElementById('highScoreBoard');
-        const screenMessage = document.getElementById('screen-message');
-        const msgTitle = document.getElementById('msg-title');
-        const msgText = document.getElementById('msg-text');
-        const startBtn = document.getElementById('startBtn');
-
-        // Game State
-        let isPlaying = false;
-        let score = 0;
-        let highScore = localStorage.getItem('neonRunnerHighScore') || 0;
-        highScoreBoard.innerText = `TERTINGGI: ${highScore}`;
-
-        // Game Variables
-        let player;
-        let obstacles = [];
-        let gameSpeed = 6;
-        let animationFrameId;
-        let spawnTimer = 0;
-
-        // Player Object
-        class Player {
-            constructor() {
-                this.x = 80;
-                this.y = 300;
-                this.size = 35;
-                this.vy = 0;
-                this.gravity = 0.6;
-                this.jumpForce = -13;
-                this.isGrounded = false;
-                this.glow = 0;
-            }
-
-            jump() {
-                if (this.isGrounded) {
-                    this.vy = this.jumpForce;
-                    this.isGrounded = false;
-                }
-            }
-
-            update() {
-                this.vy += this.gravity;
-                this.y += this.vy;
-
-                // Batas tanah (Floor line is at y = 350)
-                if (this.y + this.size >= 350) {
-                    this.y = 350 - this.size;
-                    this.vy = 0;
-                    this.isGrounded = true;
-                }
-
-                // Efek animasi glow pulsa
-                this.glow = Math.sin(Date.now() / 100) * 5;
-            }
-
-            draw() {
-                ctx.save();
-                ctx.shadowBlur = 10 + this.glow;
-                ctx.shadowColor = '#00f0ff';
-                ctx.fillStyle = '#00f0ff';
-                // Menggambar karakter kotak futuristik
-                ctx.fillRect(this.x, this.y, this.size, this.size);
-                
-                // Variasi core bagian dalam
-                ctx.shadowBlur = 0;
-                ctx.fillStyle = '#fff';
-                ctx.fillRect(this.x + 8, this.y + 8, this.size - 16, this.size - 16);
-                ctx.restore();
-            }
+    function cekPesan() {
+        const nisn = document.getElementById('nisn').value;
+        const tgl = document.getElementById('tglLahir').value;
+        const kunci = nisn + "_" + tgl;
+        const hasil = document.getElementById('hasil');
+        
+        if(dataSiswa[kunci]) {
+            document.getElementById('namaSiswa').innerText = dataSiswa[kunci].nama;
+            document.getElementById('isiPesan').innerText = dataSiswa[kunci].pesan;
+            hasil.style.display = 'block';
+        } else {
+            alert("Data tidak ditemukan. Pastikan NISN 10 digit dan Tanggal Lahir sudah benar.");
+            hasil.style.display = 'none';
         }
-
-        // Obstacle Object
-        class Obstacle {
-            constructor() {
-                this.x = canvas.width;
-                this.width = 20 + Math.random() * 20;
-                this.height = 30 + Math.random() * 40;
-                this.y = 350 - this.height;
-                this.color = '#ff007f';
-            }
-
-            update() {
-                this.x -= gameSpeed;
-            }
-
-            draw() {
-                ctx.save();
-                ctx.shadowBlur = 12;
-                ctx.shadowColor = this.color;
-                ctx.fillStyle = this.color;
-                ctx.fillRect(this.x, this.y, this.width, this.height);
-                ctx.restore();
-            }
-        }
-
-        // Setup Input
-        window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' || e.code === 'ArrowUp') {
-                e.preventDefault();
-                if (isPlaying) {
-                    player.jump();
-                } else if (screenMessage.style.display !== 'none') {
-                    startGame();
-                }
-            }
-        });
-
-        // Touch input untuk HP
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if (isPlaying) player.jump();
-        });
-
-        function startGame() {
-            // Reset game state
-            isPlaying = true;
-            score = 0;
-            gameSpeed = 6;
-            obstacles = [];
-            spawnTimer = 0;
-            player = new Player();
-            
-            scoreBoard.innerText = `SKOR: ${score}`;
-            screenMessage.style.display = 'none';
-            
-            // Mulai loop game
-            cancelAnimationFrame(animationFrameId);
-            gameLoop();
-        }
-
-        function gameOver() {
-            isPlaying = false;
-            cancelAnimationFrame(animationFrameId);
-            
-            if (score > highScore) {
-                highScore = score;
-                localStorage.setItem('neonRunnerHighScore', highScore);
-                highScoreBoard.innerText = `TERTINGGI: ${highScore}`;
-            }
-
-            msgTitle.innerText = "GAME OVER";
-            msgText.innerText = `Skor Kamu: ${score}\nBisa lebih baik lagi?`;
-            startBtn.innerText = "COBA LAGI";
-            screenMessage.style.display = 'block';
-        }
-
-        // Menggambar Background Tanah Elektronik
-        function drawBackground() {
-            // Garis tanah utama
-            ctx.strokeStyle = '#00f0ff';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(0, 350);
-            ctx.lineTo(canvas.width, 350);
-            ctx.stroke();
-
-            // Efek grid cyber di bawah tanah
-            ctx.strokeStyle = 'rgba(0, 240, 255, 0.15)';
-            ctx.lineWidth = 1;
-            for(let i = 0; i < canvas.width; i += 40) {
-                ctx.beginPath();
-                ctx.moveTo(i, 350);
-                ctx.lineTo(i - 100, canvas.height); // Garis perspektif perspektif
-                ctx.stroke();
-            }
-        }
-
-        // Loop Game Utama
-        function gameLoop() {
-            if (!isPlaying) return;
-
-            // Bersihkan canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw enviroment
-            drawBackground();
-
-            // Update dan Draw Player
-            player.update();
-            player.draw();
-
-            // Manage Obstacles
-            spawnTimer++;
-            // Beri jarak acak antar rintangan
-            let randomSpawnRate = Math.max(50, 90 - Math.floor(gameSpeed * 2));
-            if (spawnTimer > randomSpawnRate) {
-                obstacles.push(new Obstacle());
-                spawnTimer = 0;
-            }
-
-            for (let i = obstacles.length - 1; i >= 0; i--) {
-                obstacles[i].update();
-                obstacles[i].draw();
-
-                // Deteksi Tabrakan (AABB Collision)
-                if (
-                    player.x < obstacles[i].x + obstacles[i].width &&
-                    player.x + player.size > obstacles[i].x &&
-                    player.y < obstacles[i].y + obstacles[i].height &&
-                    player.y + player.size > obstacles[i].y
-                ) {
-                    gameOver();
-                    return;
-                }
-
-                // Hapus rintangan lolos dan tambah skor
-                if (obstacles[i].x + obstacles[i].width < 0) {
-                    obstacles.splice(i, 1);
-                    score++;
-                    scoreBoard.innerText = `SKOR: ${score}`;
-                    
-                    // Tingkatkan kecepatan setiap kelipatan 5 skor
-                    if (score % 5 === 0) {
-                        gameSpeed += 0.5;
-                    }
-                }
-            }
-
-            animationFrameId = requestAnimationFrame(gameLoop);
-        }
-
-        // Gambar tampilan awal grid saat game pertama dimuat
-        drawBackground();
-    </script>
+    }
+</script>
 </body>
 </html>
